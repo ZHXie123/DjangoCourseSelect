@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>register</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap-3.4.1-dist/css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'bootstrap-3.4.1-dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/csrf_token.js' %}"></script>
+
+    <style>
+        #avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+    </style>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h3 class="text-center">注册</h3>
+            <form id="reg_form" method="post" enctype="multipart/form-data" novalidate>
+                {% for form in form_obj %}
+                    <div class="form-group">
+                        <label for="{{ form.auto_id }}">{{ form.label }}: </label>{{ form }}
+                        <span style="color: red">{{ form.errors.0 }}</span>
+                    </div>
+                {% endfor %}
+
+                
+                <div class="form-group">
+                    <label for="avatar_input">头像: <img id="avatar" src="/static/images/default.png" alt="默认头像"></label>
+                    <input type="file" id="avatar_input" class="form-control hide">
+                </div>
+                <div class="form-group">
+                    <input type="button" id="reg_btn" class="btn btn-primary btn-block" value="注册">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 头像
+    $('#avatar_input').change(function () {
+        let myFileReaderObj = new FileReader();
+        let fileObj = $(this)[0].files[0];
+        myFileReaderObj.readAsDataURL(fileObj)
+        myFileReaderObj.onload = function () {
+            $('#avatar').attr('src', myFileReaderObj.result)
+        }
+    })
+    // 注册按钮点击事件
+$('#reg_btn').click(function () {
+    event.preventDefault(); // 阻止表单的默认提交行为
+
+    // 构建FormData对象以包含所有表单数据，包括文件
+    let formDataObj = new FormData(document.getElementById('reg_form'));
+
+    // 可以添加额外的验证或处理，例如检查输入值等
+
+    // 发送 AJAX 请求到服务器
+        $.ajax({
+            url: '{% url "base:register" %}', // 确保这是注册视图的URL
+            type: 'POST',
+            data: formDataObj,
+            contentType: false, // 告诉jQuery不要设置content-type请求头
+            processData: false, // 告诉jQuery不要处理发送的数据
+            success: function (res) {
+                // 请求成功，根据返回的数据进行处理
+                if (res.status === 2000) {
+                    alert('注册成功');
+                    window.location.href = '{% url "base:signin" %}'; // 重定向到登录页面
+                } else {
+                    // 打印错误信息
+                    console.error('注册失败：', res.message);
+                    // 遍历错误对象并显示每个字段的错误
+                    $.each(res.data, function (fieldName, errors) {
+                        var errorElement = $('#' + fieldName + '_errors');
+                        if (errorElement.length) {
+                            errorElement.text(errors[0]);
+                        } else {
+                            // 如果没有找到对应的错误显示元素，可以直接在控制台打印错误
+                            console.error(`注册失败：${fieldName} - ${errors[0]}`);
+                        }
+                    });
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                // 请求失败，显示错误信息
+                alert('AJAX请求错误: ' + errmsg);
+                console.error('注册请求失败：', errmsg, err);
+            }
+        });
+    });
+    // 移除错误高亮
+    $('input').focus(function () {
+        $(this).next().text('').parent().removeClass('has-error');
+    })
+</script>
+
+
+</body>
+</html>

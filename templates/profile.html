@@ -1,0 +1,164 @@
+<!-- profile.html -->
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>学生信息</title>
+{% endblock %}
+
+{% block css %}
+<style>
+    /* 页面整体样式 */
+    body {
+        font-family: 'Arial', sans-serif;
+        background: #f9f9f9;
+        color: #333;
+        margin-top: 20px;
+    }
+
+    /* 学生信息面板的样式 */
+    .student-info-panel {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        
+        margin: 0 auto;
+    }
+
+    /* 面板标题的样式 */
+    .panel-title {
+        font-size: 2.5em;
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* 表单样式 */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    /* 按钮样式 */
+    .btn-student {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        background: #5cb85c;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.3s ease;
+    }
+
+    .btn-student:hover {
+        background: #4cae4c;
+    }
+
+    /* 已选择的课程和可选的课程的样式 */
+    .selected-courses,
+    .available-courses {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 5px;
+        margin-bottom: 20px;
+    }
+
+    /* 下拉选择框的样式 */
+    select[multiple] {
+        height: auto;
+    }
+
+    /* 分隔线样式 */
+    .divider {
+        height: 1px;
+        background: #e5e5e5;
+        margin: 20px 0;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="student-info-panel">
+        <div class="panel-title">编辑我的信息</div>
+        <form method="post" action="{% url 'base:student_profile' %}">
+            {% csrf_token %}
+            <!-- 学生姓名 -->
+            <div class="form-group">
+                <label for="name">姓名:</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ student_info.name }}" required>
+            </div>
+            <!-- 年龄 -->
+            <div class="form-group">
+                <label for="age">年龄:</label>
+                <input type="number" class="form-control" id="age" name="age" value="{{ student_info.age }}" required>
+            </div>
+            <!-- 性别 -->
+            <div class="form-group">
+                <label for="gender">性别:</label>
+                <select class="form-control" id="gender" name="gender">
+                    {% for value, label in student_info.student_detail.gender_choice %}
+                        <option value="{{ value }}" {% if student_info.student_detail.gender == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- 专业 -->
+            <div class="form-group">
+                <label for="majorId">专业:</label>
+                <select class="form-control" id="majorId" name="majorId">
+                    {% for major in student_majors %}
+                        <option value="{{ major.id }}" {% if student_info.student_detail.majorId == major %}selected{% endif %}>
+                            {{ major.MajorName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- 班级 -->
+            <div class="form-group">
+                <label for="classes">班级:</label>
+                <select class="form-control" id="classes" name="classes">
+                    {% for cls in student_classes %}
+                        <option value="{{ cls.id }}" {% if student_info.classes == cls %}selected{% endif %}>
+                            {{ cls.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+              <!-- 添加省份下拉列表 -->
+            <div class="form-group">
+                <label for="region">省份:</label>
+                <select class="form-control" id="region" name="region">
+                    <!-- 使用 for 循环遍历 regions 列表并生成选项 -->
+                    {% for region in regions %}
+                        <option value="{{ region }}" {% if student_info.student_detail.addr == region %}selected{% endif %}>
+                            {{ region }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            
+            <!-- 提交按钮 -->
+            <button type="submit" class="btn-student">保存更改</button>
+        </form>
+    </div>
+{% endblock %}
+
+

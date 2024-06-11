@@ -1,0 +1,195 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>students</title>
+{% endblock title %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <style>
+        #id_import_group {
+            margin-left: 33px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">学生管理</div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <form action="{% url 'student:search' %}" method="post" class="navbar-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_search"></label>
+                            <input type="text" id="id_search" name="key_word" value="{{ key_word }}"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_select"></label>
+                            <select name="category" id="id_select" class="form-control">
+                                <option value="name">姓名</option>
+                                <option value="classes">班级</option>
+                                
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-default">查询</button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'student:add' %}" class="add_btn btn btn-success pull-right">添加</a>
+                </div>
+
+            </div>
+            
+            <div class="row">
+                <table class="table table-hover table-striped text-center">
+                    <thead>
+                    <tr>
+                        <th class="text-center">序号</th>
+                        <th class="text-center">姓名</th>
+                        <th class="text-center">年龄</th>
+                        <th class="text-center">性别</th>
+                        <th class="text-center">专业</th>
+                        <th class="text-center">班级</th>
+                        <th class="text-center">所选课程</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for student_obj in stu_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student_obj.name }}</td>
+                            <td>{{ student_obj.age }}</td>
+                            
+                            <td>{{ student_obj.student_detail.get_gender_display }}</td>
+                            <td>{{ student_obj.student_detail.majorId.MajorName }}</td>
+        
+                            <td>{{ student_obj.classes.name }}</td>
+                            <td>
+                                {% for course_obj in student_obj.course.all %}
+                                    {% if forloop.last %}
+                                        {{ course_obj.name }}
+                                    {% else %}
+                                        {{ course_obj.name }},
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'student:edit' student_obj.pk %}" class="btn btn-primary btn-sm">修改</a>
+                                <button data-pk="{{ student_obj.pk }}" class="del_btn btn btn-danger btn-sm">删除</button>
+                                
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <!-- 分页 -->
+                <!-- 分页导航 -->
+                <nav aria-label="Page navigation" class="text-center">
+                    <ul class="pagination">
+                        <!-- 上一页按钮 -->
+                        {% if previous_page >= 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ previous_page }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- 分页数字 -->
+                        {% for num in page_ranges %}
+                            <li class="page-item {% if num == current_page %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+
+                        <!-- 下一页按钮 -->
+                        {% if next_page <= total_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ next_page }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block js %}
+<script>
+    // 简化 CSRF token 获取和删除操作
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 绑定删除按钮的点击事件
+    $('.del_btn').click(function (e) {
+        e.preventDefault();
+        const currentPk = $(this).data('pk'); // 从 data-pk 属性获取当前点击的按钮的主键值
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/student/dels/', // 正确的端点 URL，不需要加上 currentPk
+                    type: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': getCookie('csrftoken'),
+                        'current_pk': currentPk // 通过 POST 数据发送主键值
+                    },
+                    success: function (res) {
+                        if (res.status === 'success') {
+                            Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            ).then(() => {
+                                // 从列表中移除对应的学生记录
+                                $(`tr[data-pk="${currentPk}"]`).remove();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                res.message || 'Failed to delete.',
+                                'error'
+                            )
+                        }
+                    },
+                    error: function () {
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting.',
+                            'error'
+                        )
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

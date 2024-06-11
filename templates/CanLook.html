@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.0.2/echarts.min.js"></script>
+		<style>
+			/* 全局样式重置 */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+            }
+
+            /* 导航栏样式 */
+            .navbar {
+                background-color: #333;
+                overflow: hidden;
+                position: relative;
+                display: flex;
+                
+            
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 20px;
+                text-decoration: none;
+                border-radius: 10px;
+                transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+                margin: 0 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                position: relative;
+                z-index: 1;
+            }
+
+            .navbar a::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #555;
+                border-radius: 10px;
+                opacity: 0;
+                transform: scale(0.9);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                z-index: -1;
+            }
+
+            .navbar a:hover::before {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            .navbar a:hover {
+                color: #fff;
+                background-color: transparent;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+
+
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+            }
+
+            /* 动画效果 */
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .navbar a {
+                animation: slideIn 0.5s ease forwards;
+            }
+
+            /* 容器样式，使用 Flexbox 实现垂直布局 */
+            .container-wrapper {
+                display: flex;
+                flex-direction: column; /* 垂直布局 */
+                align-items: center; /* 如有需要，可以设置水平居中 */
+            }
+
+            /* 子容器样式，使 #container 和 #container2 并排显示 */
+            .container-row {
+                display: flex;
+                width: 100%;
+                justify-content: space-between; /* 根据需要调整空间分配 */
+            }
+
+            #container {
+                width: calc(60% - 10px); /* 减去 margin 宽度，防止容器之间重叠 */
+                height: 600px;
+                margin: 10px;
+                border-radius: 15px; /* 圆角边框 */
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 更重的阴影效果 */
+            }
+
+            #container2 {
+                width: calc(40% - 10px); /* 减去 margin 宽度，防止容器之间重叠 */
+                height: 600px;
+                margin: 10px;
+                border-radius: 15px; /* 圆角边框 */
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 更重的阴影效果 */
+            }
+
+            /* 新增 #container3 样式 */
+            #container3 {
+                width: 1000px; /* 根据页面布局调整 */
+                height: 600px; /* 根据需要调整高度 */
+                margin: 10px;
+                border-radius: 15px; /* 圆角边框 */
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 更重的阴影效果 */
+            }
+
+            /* 新增 #container4 样式 */
+            #container4 {
+                width: 1000px; /* 根据页面布局调整宽度 */
+                height: 600px; /* 根据需要调整高度 */
+                margin: 10px;
+                border-radius: 15px; /* 圆角边框 */
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 更重的阴影效果 */
+            }
+
+            /* 更新 .container-row 样式以适应两列布局 */
+            .container-row {
+                display: flex;
+                width: 100%;
+                justify-content: space-between; /* 调整为 space-between 以在容器之间留出空间 */
+                margin-bottom: 10px; /* 容器行之间的间距 */
+            }
+
+
+		</style>
+	</head>
+	<body>
+		
+		<nav class="navbar">
+			<div>
+				<a href="{% url 'base:index' %}" class="active">首页 <span class="sr-only">(current)</span></a>
+			</div>
+		</nav>
+
+		<div class="container-wrapper">
+			<div class="container-row">
+				<div id="container"></div>
+				<div id="container2"></div>
+			</div>
+			<div class="container-row">
+                <div id="container3"></div> <!-- 垂直放置在下方 -->
+                <div id="container4"></div> <!-- 新增的容器 -->
+            </div>
+		</div>
+
+		
+		<!-- 柱状图 -->
+        <script>
+            var echart = echarts.init(document.getElementById("container"));
+
+            // 发起 fetch 请求获取数据
+            fetch("http://127.0.0.1:8080/canlook/get/")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 假设 data.seriesData 是一个数组，每个元素包含了一个专业的课程和选课人数
+                    var seriesData = data.seriesData;
+
+                    var option = {
+                        title: {
+                            text: '每个专业中的每节课的选课人数'
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {
+                                type: 'shadow'
+                            }
+                        },
+                        legend: {
+                            data: seriesData.map((majorData, index) => seriesData[index].name)
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: seriesData[0].courses.map(course => course.name) // 假设所有专业都有相同数量的课程
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: seriesData.map((majorData, index) => {
+                            return {
+                                name: majorData.name,
+                                type: 'bar',
+                                data: majorData.courses.map(course => course.num_students)
+                            };
+                        })
+                    };
+
+                    echart.setOption(option);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        </script>
+
+        
+        <!-- 玫瑰图 -->
+        <script>
+            var radarChart = echarts.init(document.getElementById("container2"));
+        
+            // 发起 fetch 请求获取数据
+            fetch("http://127.0.0.1:8080/GetRadarData/")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                var option = {
+                    title: {
+                        text: '学生课程成绩雷达图'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            // params.name 是系列名称，即学生的名字
+                            // params.value 是一个数组，包含该学生的成绩
+                            var studentName = params.name;
+                            var scores = params.value; // 该学生的成绩数组
+                            var tooltipStr = studentName + "：<br>"; // 初始化提示信息字符串
+                            // 遍历所有课程，构建完整的提示信息
+                            for (var i = 0; i < data.indicator.length; i++) {
+                                tooltipStr += data.indicator[i] + "：" + (scores[i] || 0) + "<br>"; // 如果成绩不存在，则显示0
+                            }
+                            return tooltipStr; // 返回完整的提示信息
+                        }
+                    },
+                    radar: {
+                        indicator: data.indicator.map(item => ({ name: item })),
+                        radius: '80%'
+                    },
+                    series: [{
+                        name: '学生成绩',
+                        type: 'radar',
+                        data: data.series.map(student => ({
+                            value: student.data,  // 使用学生的成绩数组
+                            name: student.name    // 学生姓名作为系列名称
+                        })),
+                        symbol: 'circle',  // 散点图形为圆形
+                        symbolSize: 3
+                    }]
+                };
+        
+                radarChart.setOption(option);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        </script>
+
+
+<!-- 饼图 -->
+<!-- <script>
+    var chart = echarts.init(document.getElementById('container2'));
+
+    fetch("http://127.0.0.1:8080/canlook/get")
+        .then(response => {
+            // 检查响应状态
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 确保data对象中有pieData属性
+            if (data && data.pieData) {
+                var PieData = data.pieData;
+
+                var option = {
+                    title: {
+                        text: '饼图',   // 图表标题
+                        x: 'center'   // 标题位置
+                    },
+                    series: [{
+                        type: 'pie',   // 图表类型为饼图
+                        radius: '60%',   // 饼图半径
+                        data: PieData,
+                        label: {
+                            normal: {
+                                formatter: '{b}: {c} ({d}%)' // 转义花括号
+                            }
+                        }
+                    }]
+                }
+
+                chart.setOption(option);
+            } else {
+                console.error('No pieData found in the response');
+            }
+        })
+        .catch(error => {
+            console.error('Fetching error:', error);
+        });
+</script> -->
+
+
+
+
+<script>
+    // 初始化 ECharts 实例
+    var heatmapChart = echarts.init(document.getElementById('container3'));
+
+    // 发起 Fetch 请求获取数据
+    fetch("http://127.0.0.1:8080/GetHotData/")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 热力图配置
+            var option = {
+                title: {
+                    text: '课程选课热度图',
+                    left: 'center'
+                },
+                tooltip: {
+                    position: 'top'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: data.XData
+                },
+                yAxis: {
+                    type: 'category',
+                    data: data.YData
+                },
+                visualMap: {
+                    min: 0,
+                    max: data.max,
+                    calculable: true,
+                    orient: 'vertical', // 改为垂直方向
+                    left: 'right',       // 调整到图表的右侧
+                    bottom: '0',         // 可以调整为其他值，如 '5%'，根据需要调整
+                    padding: [0, 0, 0, 0], // 调整组件与图表边缘的距离
+                    inRange: {
+                        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    }
+                },
+                series: [{
+                    name: '热度',
+                    type: 'heatmap',
+                    data: Object.keys(data.resultMap).map(key => {
+                        var parts = key.split('-');
+                        return [data.XData.indexOf(parts[1]), data.YData.indexOf(parts[0]), data.resultMap[key]];
+                    }),
+                    label: {
+                        show: true,
+                        color: '#000'
+                    }
+                }]
+            };
+
+            // 使用配置项和数据显示图表
+            heatmapChart.setOption(option);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+</script>
+
+<script>
+    // 基于准备好的 DOM，初始化 ECharts 实例
+    var myChart = echarts.init(document.getElementById('container4'));
+
+    // 发起 fetch 请求获取数据
+    fetch("http://127.0.0.1:8080/GetLineData/")
+        .then(response => {
+            // 检查响应状态
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 确保返回的数据中包含所需的属性
+            if (data && data.courseChineseName && data.courseSelectTime) {
+                var Xdata = data.courseChineseName;
+                var Ydata = data.courseSelectTime;
+
+                var option = {
+                    title: {
+                        text: '各专业学生人数' // 折线图标题
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross'
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: Xdata
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        name: '学生人数',
+                        type: 'line',
+                        data: Ydata
+                    }]
+                };
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            } else {
+                console.error('返回的数据格式不正确');
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+</script>
+    
+
+	</body>
+</html>
+

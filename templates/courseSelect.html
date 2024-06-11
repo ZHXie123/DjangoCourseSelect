@@ -1,0 +1,108 @@
+<!-- courseSelect.html -->
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>课程选择</title>
+{% endblock %}
+
+{% block css %}
+<style>
+    /* 继承基础样式 */
+    body {
+        background-color: #f8f9fa; /* 与 index.html 保持一致 */
+        color: #333;
+    }
+    
+    /* 容器样式 */
+    .container {
+        max-width: 1200px;
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    /* 标题样式 */
+    h2 {
+        margin-bottom: 20px;
+        text-align: center;
+        color: #d9534f; /* 与导航栏品牌颜色保持一致 */
+    }
+
+    /* 列表样式 */
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eaeaea;
+    }
+    .list-group-item:first-child {
+        border-top: 1px solid #eaeaea;
+    }
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    /* 按钮样式 */
+    .btn {
+        padding: 8px 15px;
+        margin-right: 10px; /* 与 index.html 按钮保持一致 */
+    }
+
+    /* 按钮颜色与 index.html 保持一致 */
+    .btn-success {
+        background-color: #5cb85c;
+        color: #fff;
+    }
+    .btn-danger {
+        background-color: #d9534f;
+        color: #fff;
+    }
+
+    /* 按钮悬停效果 */
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    /* 表单样式 */
+    form {
+        display: flex;
+        align-items: center;
+    }
+
+    /* 隐藏文件输入的样式 */
+    input[type="file"] {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>课程列表</h2>
+    <ul class="list-group">
+        {% for course in courses %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ course.name }} - 学分: {{ course.credit }} - 开课时间: {{ course.course_open_time }} - 老师: {{ course.teacher.name }}
+                {% if course in student_courses %}
+                    <!-- 如果课程已选，显示退课按钮 -->
+                    <form action="{% url 'base:course_select' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="course_id" value="{{ course.id }}">
+                        <input type="hidden" name="action" value="unenroll">
+                        <button type="submit" class="btn btn-danger">退课</button>
+                    </form>
+                {% else %}
+                    <!-- 如果课程未选，显示选课按钮 -->
+                    <form action="{% url 'base:course_select' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="course_id" value="{{ course.id }}">
+                        <input type="hidden" name="action" value="enroll">
+                        <button type="submit" class="btn btn-success">选课</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

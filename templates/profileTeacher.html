@@ -1,0 +1,110 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>教师信息</title>
+{% endblock %}
+
+{% block css %}
+<style>
+    /* 自定义样式 */
+    .teacher-profile {
+        width: 100%;
+        
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-control {
+        width: 100%;
+        
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* 确保内边距和边框不会增加宽度 */
+    }
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        background-color: #5cb85c;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    .btn-primary:hover {
+        background-color: #4cae4c;
+    }
+    /* 可选：添加一些响应式设计 */
+    @media (max-width: 768px) {
+        .teacher-profile {
+            width: 95%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="teacher-profile">
+        <h1>教师信息</h1>
+        <form action="{% url 'base:teacher_profile' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- 显示用户名 -->
+            <div class="form-group">
+                <label for="name">姓名:</label>
+                <input type="text" id="name" name="name" value="{{ user_obj.username }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">邮箱:</label>
+                <input type="email" id="email" name="email" value="{{ user_obj.email }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">手机号:</label>
+                <input type="text" id="phone" name="phone" value="{{ teacher_obj.phone }}" class="form-control">
+            </div>
+           
+
+            <div class="form-group">
+                <label for="gender">性别:</label>
+                <select id="gender" name="gender" class="form-control">
+                    <option value="1" {% if teacher_obj.gender == 1 %}selected{% endif %}>男</option>
+                    <option value="2" {% if teacher_obj.gender == 2 %}selected{% endif %}>女</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="age">年龄:</label>
+                <input type="number" id="age" name="age" value="{{ teacher_obj.age }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="major">专业:</label>
+                <select id="major" name="major" class="form-control">
+                    {% for major in majors %}
+                        <option value="{{ major.id }}" {% if teacher_obj.major == major %}selected{% endif %}>
+                            {{ major.MajorName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- 密码字段，不展示当前密码，允许修改 -->
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="留空则不修改密码">
+            </div>
+            <input type="submit" value="更新信息" class="btn btn-primary">
+        </form>
+    </div>
+{% endblock %}

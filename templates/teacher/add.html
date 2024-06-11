@@ -1,0 +1,64 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>teacher-add</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">添加</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">老师姓名: </label>
+                    <input type="text" id="id_name" name="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_phone">老师手机号: </label>
+                    <input type="text" id="id_phone" name="phone" class="form-control">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="id_gender">性别: </label>
+                    <select id="id_gender" name="gender" class="form-control">
+                        <option value="1">男</option>
+                        <option value="2">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_age">年龄: </label>
+                    <input type="number" id="id_age" name="age" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">邮箱:</label>
+                    <input type="email" id="id_email" name="email" class="form-control" required>
+                    <!-- 注意：输入类型应为 "email" 以进行基本的验证 -->
+                </div>
+
+                <div class="form-group">
+                    <label for="id_major">专业:</label>
+                    <select id="id_major" name="major" class="form-control" required>
+                        <!-- 动态生成专业列表 -->
+                        {% if majors %}
+                            <option value="">请选择专业</option>  <!-- 提供一个选择专业前的占位选项 -->
+                            {% for major in majors %}
+                                <option value="{{ major.id }}">{{ major.MajorName }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">没有可用的专业</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+
+                <input type="submit" class="btn btn-danger" value="确认添加">
+                <a href="{% url 'base:teacher' %}" class="btn btn-primary">取消添加</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

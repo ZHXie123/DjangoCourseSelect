@@ -1,0 +1,123 @@
+<!-- adminCourseControl.html -->
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>管理学生成绩</title>
+{% endblock %}
+
+{% block css %}
+<style>
+    .admin-score-control {
+        width: 100%;
+        max-width: 1200px;
+        
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    h1 {
+        font-size: 24px;
+        color: #333;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f7f7f7;
+    }
+
+    .student-info {
+        margin-bottom: 30px;
+    }
+
+    .btn.btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .btn.btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    input[type="text"] {
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    input[type="submit"] {
+        margin-top: 10px;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .admin-score-control {
+            width: 100%;
+            padding: 10px;
+        }
+
+        th, td {
+            padding: 5px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-score-control">
+    <h1>管理学生成绩</h1>
+    <form action="{% url 'base:adminScore' %}" method="post">
+        {% csrf_token %}
+        {% for student_data in students_with_courses %}
+            <div class="student-info">
+                <h2>{{ student_data.student.name }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>课程名称</th>
+                            <th>成绩</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in student_data.courses %}
+                            <tr>
+                                <td>{{ course.course.name }}</td>
+                                <td>
+                                    <input type="hidden" name="student_id" value="{{ student_data.student.id }}">
+                                    <input type="hidden" name="course_id" value="{{ course.course.id }}">
+                                    {% if course.score %}
+                                        <input type="text" name="score" value="{{ course.score }}">
+                                    {% else %}
+                                        <input type="text" name="score" value="" placeholder="请输入成绩">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        <input type="submit" value="保存成绩" class="btn btn-primary">
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base/index.html' %}
+
+{% block title %}
+    <title>student-add</title>
+{% endblock title %}
+
+
+
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="panel-title">添加</div>
+        </div>
+        <div class="panel-body">
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">姓名: </label>
+                    <input type="text" id="id_name" name="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_age">年龄: </label>
+                    <input type="text" id="id_age" name="age" class="form-control">
+                </div>
+                <!-- 性别 -->
+                <div class="form-group">
+                    <label for="id_sex">性别:</label>
+                    <select class="form-control" id="id_sex" name="sex" required>
+                        <option value="">请选择性别</option>
+                        <option value="1">男</option>
+                        <option value="2">女</option>
+                    </select>
+                </div>
+
+                <!-- 地名 -->
+                <div class="form-group">
+                    <label for="id_province">省份: </label>
+                    <select name="province" id="id_province" class="form-control">
+                        <option value="">请选择省份</option>
+                        <option value="北京">北京</option>
+                        <option value="上海">上海</option>
+                        <option value="天津">天津</option>
+                        <option value="重庆">重庆</option>
+                        <!-- 省份 -->
+                        <option value="河北">河北</option>
+                        <option value="山西">山西</option>
+                        <option value="辽宁">辽宁</option>
+                        <option value="吉林">吉林</option>
+                        <option value="黑龙江">黑龙江</option>
+                        <option value="江苏">江苏</option>
+                        <option value="浙江">浙江</option>
+                        <option value="安徽">安徽</option>
+                        <option value="福建">福建</option>
+                        <option value="江西">江西</option>
+                        <option value="山东">山东</option>
+                        <option value="河南">河南</option>
+                        <option value="湖北">湖北</option>
+                        <option value="湖南">湖南</option>
+                        <option value="广东">广东</option>
+                        <option value="海南">海南</option>
+                        <option value="四川">四川</option>
+                        <option value="贵州">贵州</option>
+                        <option value="云南">云南</option>
+                        <option value="陕西">陕西</option>
+                        <option value="甘肃">甘肃</option>
+                        <option value="青海">青海</option>
+                        <option value="内蒙古">内蒙古</option>
+                        <option value="广西">广西</option>
+                        <option value="西藏">西藏</option>
+                        <option value="宁夏">宁夏</option>
+                        <option value="新疆">新疆</option>
+                        <!-- 自治区 -->
+                        <option value="内蒙古">内蒙古</option>
+                        <option value="广西">广西</option>
+                        <option value="西藏">西藏</option>
+                        <option value="宁夏">宁夏</option>
+                        <option value="新疆">新疆</option>
+                        <!-- 特别行政区 -->
+                        <option value="香港">香港</option>
+                        <option value="澳门">澳门</option>
+                    </select>
+                </div>
+
+                <!-- 专业下拉列表 -->
+                <div class="form-group">
+                    <label for="id_major">专业:</label>
+                    <select class="form-control" id="id_major" name="major">
+                        <option value="">请选择专业</option>
+                        {% for major in major_queryset %}
+                            <option value="{{ major.id }}">{{ major.MajorName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    {% for class_obj in class_queryset %}
+                        <label for="id_classes_{{ forloop.counter }}">{{ class_obj.name }}</label>
+                        <input type="radio" id="id_classes_{{ forloop.counter }}" name="classes" value="{{ class_obj.pk }}">
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {% for course_obj in course_queryset %}
+                        <label for="id_course_{{ forloop.counter }}">{{ course_obj.name }}</label>
+                        <input type="checkbox" id="id_course_{{ forloop.counter }}" name="course" value="{{ course_obj.pk }}">
+                    {% endfor %}
+                </div>
+                <input type="submit" class="btn btn-danger" value="确认添加">
+                <a href="{% url 'base:students' %}" class="btn btn-primary">取消添加</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
